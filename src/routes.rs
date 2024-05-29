@@ -9,7 +9,7 @@ use crate::AppState;
 pub fn app_router(state: AppState) -> Router<AppState> {
     Router::new()
         .route("/", get(root))
-        .nest("/v1/posts", posts_routes(state.clone()))
+        .nest("/v1/posts", posts_routes(state))
         .fallback(handler_404)
 }
 

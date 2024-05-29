@@ -1,61 +1,32 @@
-use std::env;
-
-use dotenvy::dotenv;
+use envconfig::Envconfig;
 use tokio::sync::OnceCell;
 
-#[derive(Debug)]
-struct ServerConfig {
-    host: String,
-    port: u16,
-}
-
-#[derive(Debug)]
-struct DatabaseConfig {
-    url: String,
-}
-
-#[derive(Debug)]
+#[derive(Debug, Envconfig)]
 pub struct Config {
-    server: ServerConfig,
-    db: DatabaseConfig,
+    #[envconfig(nested = true)]
+    pub server: ServerConfig,
+    #[envconfig(nested = true)]
+    pub db: DatabaseConfig,
 }
 
-impl Config {
-    pub fn db_url(&self) -> &str {
-        &self.db.url
-    }
+#[derive(Debug, Envconfig)]
+pub struct ServerConfig {
+    #[envconfig(from = "HOST", default = "0.0.0.0")]
+    pub host: String,
+    #[envconfig(from = "PORT", default = "3000")]
+    pub port: u16,
+}
 
-    pub fn server_host(&self) -> &str {
-        &self.server.host
-    }
-
-    pub fn server_port(&self) -> u16 {
-        self.server.port
-    }
+#[derive(Debug, Envconfig)]
+pub struct DatabaseConfig {
+    #[envconfig(from = "DATABASE_URL")]
+    pub url: String,
 }
 
 pub static CONFIG: OnceCell<Config> = OnceCell::const_new();
 
-async fn init_config() -> Config {
-    dotenv().ok();
-    let server_config = ServerConfig {
-        host: env::var("HOST").unwrap_or_else(|_| String::from("127.0.0.1")),
-        port: env::var("PORT")
-            .unwrap_or_else(|_| String::from("3000"))
-            .parse::<u16>()
-            .unwrap(),
-    };
-
-    let database_config = DatabaseConfig {
-        url: env::var("DATABASE_URL").expect("DATABASE_URL must be set"),
-    };
-
-    Config {
-        server: server_config,
-        db: database_config,
-    }
-}
-
 pub async fn config() -> &'static Config {
-    CONFIG.get_or_init(init_config).await
+    CONFIG
+        .get_or_init(|| async { Config::init_from_env().unwrap() })
+        .await
 }

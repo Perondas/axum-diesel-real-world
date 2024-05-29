@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
-use axum::Json;
 use axum::response::IntoResponse;
+use axum::Json;
 use serde_json::json;
 use uuid::Uuid;
 
@@ -17,16 +17,16 @@ pub struct PostModel {
 #[derive(Debug)]
 pub enum PostError {
     InternalServerError,
-    NotFound(Uuid),
+    NotFound,
     InfraError(InfraError),
 }
 
 impl IntoResponse for PostError {
     fn into_response(self) -> axum::response::Response {
         let (status, err_msg) = match self {
-            Self::NotFound(id) => (
+            Self::NotFound => (
                 StatusCode::NOT_FOUND,
-                format!("PostModel with id {} has not been found", id),
+                "PostModel has not been found".to_string(),
             ),
             Self::InfraError(db_error) => (
                 StatusCode::INTERNAL_SERVER_ERROR,

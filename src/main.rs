@@ -5,7 +5,6 @@ use diesel_migrations::{embed_migrations, EmbeddedMigrations, MigrationHarness};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 use crate::config::config;
-use crate::errors::internal_error;
 use crate::routes::app_router;
 
 mod config;
@@ -29,10 +28,7 @@ async fn main() {
 
     let config = config().await;
 
-    let manager = Manager::new(
-        config.db_url().to_string(),
-        deadpool_diesel::Runtime::Tokio1,
-    );
+    let manager = Manager::new(config.db.url.to_string(), deadpool_diesel::Runtime::Tokio1);
     let pool = Pool::builder(manager).build().unwrap();
 
     {
@@ -43,8 +39,8 @@ async fn main() {
 
     let app = app_router(state.clone()).with_state(state);
 
-    let host = config.server_host();
-    let port = config.server_port();
+    let host = config.server.host.to_string();
+    let port = config.server.port;
 
     let address = format!("{}:{}", host, port);
 
@@ -54,7 +50,6 @@ async fn main() {
     axum::Server::bind(&socket_addr)
         .serve(app.into_make_service())
         .await
-        .map_err(internal_error)
         .unwrap()
 }
 

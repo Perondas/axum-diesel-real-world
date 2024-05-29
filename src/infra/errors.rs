@@ -1,15 +1,9 @@
 use std::fmt;
 
-use deadpool_diesel::InteractError;
-
 #[derive(Debug)]
 pub enum InfraError {
     InternalServerError,
     NotFound,
-}
-
-pub fn adapt_infra_error<T: Error>(error: T) -> InfraError {
-    error.as_infra_error()
 }
 
 impl fmt::Display for InfraError {
@@ -21,27 +15,23 @@ impl fmt::Display for InfraError {
     }
 }
 
-pub trait Error {
-    fn as_infra_error(&self) -> InfraError;
-}
-
-impl Error for diesel::result::Error {
-    fn as_infra_error(&self) -> InfraError {
-        match self {
+impl From<diesel::result::Error> for InfraError {
+    fn from(error: diesel::result::Error) -> Self {
+        match error {
             diesel::result::Error::NotFound => InfraError::NotFound,
             _ => InfraError::InternalServerError,
         }
     }
 }
 
-impl Error for deadpool_diesel::PoolError {
-    fn as_infra_error(&self) -> InfraError {
+impl From<deadpool_diesel::PoolError> for InfraError {
+    fn from(_: deadpool_diesel::PoolError) -> Self {
         InfraError::InternalServerError
     }
 }
 
-impl Error for InteractError {
-    fn as_infra_error(&self) -> InfraError {
+impl From<deadpool_diesel::InteractError> for InfraError {
+    fn from(value: deadpool_diesel::InteractError) -> Self {
         InfraError::InternalServerError
     }
 }

@@ -17,9 +17,7 @@ pub async fn create_post(
         published: false,
     };
 
-    let created_post = post_repository::insert(&state.pool, new_post_db)
-        .await
-        .map_err(PostError::InfraError)?;
+    let created_post = post_repository::insert(&state.pool, new_post_db).await?;
 
     let post_response = PostResponse {
         id: created_post.id,

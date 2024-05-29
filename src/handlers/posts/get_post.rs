@@ -13,13 +13,7 @@ pub async fn get_post(
     State(state): State<AppState>,
     PathExtractor(post_id): PathExtractor<Uuid>,
 ) -> Result<Json<PostResponse>, PostError> {
-    let post =
-        post_repository::get(&state.pool, post_id)
-            .await
-            .map_err(|db_error| match db_error {
-                InfraError::InternalServerError => PostError::InternalServerError,
-                InfraError::NotFound => PostError::NotFound(post_id),
-            })?;
+    let post = post_repository::get(&state.pool, post_id).await?;
 
     Ok(Json(adapt_post_to_post_response(post)))
 }
