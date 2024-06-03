@@ -27,6 +27,6 @@ pub static CONFIG: OnceCell<Config> = OnceCell::const_new();
 
 pub async fn config() -> &'static Config {
     CONFIG
-        .get_or_init(|| async { Config::init_from_env().unwrap() })
+        .get_or_init(|| async { Config::init_from_env().expect("Failed to read config") })
         .await
 }
