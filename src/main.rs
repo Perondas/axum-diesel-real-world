@@ -9,11 +9,9 @@ use crate::routes::app_router;
 
 mod config;
 mod domain;
-mod errors;
 mod handlers;
 mod infra;
 mod routes;
-mod utils;
 
 pub const MIGRATIONS: EmbeddedMigrations = embed_migrations!("migrations/");
 
