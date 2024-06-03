@@ -31,7 +31,7 @@ impl From<deadpool_diesel::PoolError> for InfraError {
 }
 
 impl From<deadpool_diesel::InteractError> for InfraError {
-    fn from(value: deadpool_diesel::InteractError) -> Self {
+    fn from(_: deadpool_diesel::InteractError) -> Self {
         InfraError::InternalServerError
     }
 }

@@ -11,20 +11,7 @@ pub async fn create_post(
     State(state): State<AppState>,
     JsonExtractor(new_post): JsonExtractor<CreatePostRequest>,
 ) -> Result<Json<PostResponse>, PostError> {
-    let new_post_db = post_repository::NewPostDb {
-        title: new_post.title,
-        body: new_post.body,
-        published: false,
-    };
+    let created_post = post_repository::insert(&state.pool, new_post.into()).await?;
 
-    let created_post = post_repository::insert(&state.pool, new_post_db).await?;
-
-    let post_response = PostResponse {
-        id: created_post.id,
-        title: created_post.title,
-        body: created_post.body,
-        published: created_post.published,
-    };
-
-    Ok(Json(post_response))
+    Ok(Json(created_post.into()))
 }

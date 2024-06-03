@@ -4,8 +4,6 @@ use axum::Json;
 use serde_json::json;
 use uuid::Uuid;
 
-use crate::infra::errors::InfraError;
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct PostModel {
     pub id: Uuid,
@@ -18,7 +16,6 @@ pub struct PostModel {
 pub enum PostError {
     InternalServerError,
     NotFound,
-    InfraError(InfraError),
 }
 
 impl IntoResponse for PostError {
@@ -27,10 +24,6 @@ impl IntoResponse for PostError {
             Self::NotFound => (
                 StatusCode::NOT_FOUND,
                 "PostModel has not been found".to_string(),
-            ),
-            Self::InfraError(db_error) => (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                format!("Internal server error: {}", db_error),
             ),
             _ => (
                 StatusCode::INTERNAL_SERVER_ERROR,

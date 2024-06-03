@@ -47,7 +47,7 @@ pub async fn insert(
         })
         .await??;
 
-    Ok(res.as_model())
+    Ok(res.into())
 }
 
 pub async fn get(
@@ -64,7 +64,7 @@ pub async fn get(
         })
         .await??;
 
-    Ok(res.as_model())
+    Ok(res.into())
 }
 
 pub async fn get_all(
@@ -88,18 +88,7 @@ pub async fn get_all(
         })
         .await??;
 
-    let posts: Vec<PostModel> = res.into_iter().map(PostDb::as_model).collect();
+    let posts: Vec<PostModel> = res.into_iter().map(PostDb::into).collect();
 
     Ok(posts)
-}
-
-impl PostDb {
-    fn as_model(self) -> PostModel {
-        PostModel {
-            id: self.id,
-            title: self.title,
-            body: self.body,
-            published: self.published,
-        }
-    }
 }
